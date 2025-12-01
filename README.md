@@ -1,2 +1,1 @@
-# elegantbot
-An AI BOT helping a customer with finance related queries using RAG to decrease hallucinations and provide contextual answers.
+An SME-First RAG based Artificially Intelligent System to draft Bid Applications Compliant with UK Procurement Regulations.

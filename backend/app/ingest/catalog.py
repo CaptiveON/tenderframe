@@ -108,12 +108,19 @@ def refresh_catalog(db: Session, domain: str) -> dict:
         for base_path, doc_type in search_documents(query):
             discovered.setdefault(base_path, doc_type)
 
-    added = 0
+    added = re_enabled = 0
     for base_path, source_kind in discovered.items():
-        if db.get(CatalogEntry, base_path) is None:
+        row = db.get(CatalogEntry, base_path)
+        if row is None:
             db.add(CatalogEntry(base_path=base_path, domain=domain, source_kind=source_kind))
             added += 1
+        elif not row.enabled:
+            # explicitly seeded again → authoritative; re-enable if previously
+            # disabled (e.g. an old search-sourced row that's now a pin)
+            row.enabled = True
+            re_enabled += 1
     db.commit()
-    stats = {"domain": domain, "discovered": len(discovered), "added": added}
+    stats = {"domain": domain, "discovered": len(discovered),
+             "added": added, "re_enabled": re_enabled}
     logger.info("catalog refresh: %s", stats)
     return stats

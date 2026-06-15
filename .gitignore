@@ -138,7 +138,7 @@ celerybeat.pid
 .env
 .envrc
 .venv
-venv_tenderframe/
+venv_tenderframe
 env/
 venv/
 ENV/
@@ -201,6 +201,9 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Claude
+tenderframe/docs
 
 # Marimo
 marimo/_static/

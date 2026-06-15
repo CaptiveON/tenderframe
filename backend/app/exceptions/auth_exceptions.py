@@ -6,5 +6,5 @@ class EmailOrPasswordException(AppException):
     detail = "Incorrect Email or Password. Try LOGIN Again!"
     
 class LoginTimeOut(AppException):
-    status = status.HTTP_401_UNAUTHORIZED
+    status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Could not Validate Credentials. LOGIN Again!"

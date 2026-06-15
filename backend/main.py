@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1 import answers
 from app.api.v1 import chat
 from app.api.v1 import user
 from app.exceptions.base import AppException
@@ -22,6 +23,7 @@ app.add_middleware(
 
 app.include_router(user.router, prefix="/api/v1")
 app.include_router(chat.router, prefix="/api/v1")
+app.include_router(answers.router, prefix="/api/v1")
 
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException):

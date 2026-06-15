@@ -26,24 +26,40 @@ class ChatService:
         )
         
         user_message = crud_chat.create_message(db, user_message)
-        
-        bot_response_text = f"I have received your message: {message_data.content}"
-        
+
+        citations, abstained, audit_id = [], False, None
+        if message_data.mode:
+            # RAG pipeline: retrieve -> answer -> verify -> audit. The mode
+            # value IS the domain label (domain-as-config).
+            from app.services.rag_service import rag_service
+            result = rag_service.answer_question(
+                db, user_id, chat_session.id, message_data.content, message_data.mode
+            )
+            bot_response_text = result.answer
+            citations = [c.model_dump() for c in result.citations]
+            abstained = result.abstained
+            audit_id = result.audit_id
+        else:
+            bot_response_text = f"I have received your message: {message_data.content}"
+
         if not bot_response_text:
             raise BotResponseException()
-        
+
         bot_message = Message(
             session_id = chat_session.id,
             role = "bot",
             content = bot_response_text
         )
-        
+
         bot_message = crud_chat.create_message(db, bot_message)
-        
+
         return ChatResponse(
             user_message= MessageResponse.model_validate(user_message),
             bot_response= MessageResponse.model_validate(bot_message),
-            session_id= chat_session.id
+            session_id= chat_session.id,
+            citations= citations,
+            abstained= abstained,
+            audit_id= audit_id
         )
         
     def get_chat_history(self, db: Session, session_id: str):

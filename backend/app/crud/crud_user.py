@@ -6,7 +6,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated = "auto")
 
 def get_user_by_id(db:Session, user_id: str) -> User:
     
-    return db.query(User).filter(User.id == user_id).one()
+    return db.query(User).filter(User.id == user_id).first()
 
 def get_user_by_email(db:Session, user_email:str) -> User:
     

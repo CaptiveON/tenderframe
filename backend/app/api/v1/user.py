@@ -11,7 +11,7 @@ from app.core.security import create_access_token
 
 router = APIRouter(prefix="/user",tags=["authentication"])
 
-@router.post("/anonymous", response_model=UserResponse)
+@router.post("/anonymous", response_model=Token)
 def create_anonymous_user(db: Session = Depends(get_db)):
     
     user = user_service.create_anonymous_user(db)

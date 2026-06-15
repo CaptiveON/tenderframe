@@ -33,3 +33,11 @@ uvicorn==0.24.0
 uvloop==0.22.1
 watchfiles==1.1.1
 websockets==15.0.1
+# --- RAG layer (ingest + retrieval) ---
+alembic==1.18.4
+APScheduler==3.11.2
+beautifulsoup4==4.15.0
+httpx==0.28.1
+lxml==6.1.1
+openai==2.41.1
+pgvector==0.4.2

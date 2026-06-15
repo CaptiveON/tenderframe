@@ -202,8 +202,8 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-# Claude
-tenderframe/docs
+# Claude — local project planning docs, not committed
+docs/
 
 # Marimo
 marimo/_static/

@@ -13,6 +13,18 @@ import-export VAT, corporation tax, PAYE.
 
 SEEDS: dict[str, dict] = {
     "vat": {
+        # Scope description for the relevance router (domain-as-config).
+        "description": (
+            "UK VAT for small businesses: VAT registration (thresholds, timing, "
+            "voluntary registration, exception from registration, transfer of a "
+            "going concern, and Northern Ireland / XI VAT numbers), VAT schemes "
+            "(Flat Rate, Cash Accounting, Annual Accounting), VAT rates and "
+            "liability, input tax / reclaiming VAT, VAT returns, and Making Tax "
+            "Digital for VAT. OUT OF SCOPE: the amount of import VAT or customs duty "
+            "payable on imported goods, customs procedures, corporation tax, "
+            "PAYE/payroll, income tax, and taxes of other countries (e.g. US sales "
+            "tax)."
+        ),
         # hmrc_manual roots whose child_section_groups are walked recursively.
         # All domestic-VAT manuals; import/customs manuals deliberately excluded.
         "manual_roots": [

@@ -27,10 +27,13 @@ class Settings(BaseSettings):
     EMBEDDING_DIM: int = 1536
     RETRIEVAL_TOP_K: int = 8
     RETRIEVAL_PER_SIDE: int = 30
-    # Best-cosine-similarity floor below which retrieval is considered weak and
-    # the answer pipeline abstains. Calibrated on the golden set (M3): in-scope
-    # questions scored 0.559-0.814, out-of-scope 0.378-0.542.
-    ABSTAIN_SCORE_THRESHOLD: float = 0.55
+    # Best-cosine-similarity floor below which retrieval is considered too weak
+    # to bother generating. Cosine similarity ranks well but cannot cleanly
+    # separate in-scope from out-of-scope (golden set: in-scope 0.55-0.81,
+    # out-of-scope 0.38-0.54 — they overlap), so this is only a cheap
+    # "is anything relevant at all" floor. The real scope/abstention decision is
+    # the model (answer ABSTAIN) + the verifier, which read the retrieved text.
+    ABSTAIN_SCORE_THRESHOLD: float = 0.40
     RERANKER_ENABLED: bool = False
     HYDRATION_MAX_TOKENS: int = 1500
     HYDRATION_MAX_SECTIONS: int = 6

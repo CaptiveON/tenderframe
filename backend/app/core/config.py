@@ -36,4 +36,14 @@ class Settings(BaseSettings):
     HYDRATION_MAX_SECTIONS: int = 6
     GOVUK_FETCH_DELAY_MS: int = 500
 
+    # Abuse & cost controls (F1, F2, F11). In-process / single-instance.
+    ANSWER_RATE_PER_MIN: int = 12        # per-user answer requests / minute
+    ANON_CREATE_PER_HOUR: int = 30       # per-IP anonymous-user creations / hour
+    AUTH_RATE_PER_MIN: int = 10          # per-IP login+register attempts / minute
+    DAILY_ANSWER_CAP: int = 1000         # global RAG answers / day (spend ceiling)
+    MAX_QUESTION_CHARS: int = 4000       # reject oversized questions
+
+    # Transport (F9): comma-separated allowed browser origins.
+    CORS_ORIGINS: str = "http://localhost:3000"
+
 settings = Settings()

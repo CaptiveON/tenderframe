@@ -1,10 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
+from app.core.config import settings
 
 class MessageCreate(BaseModel):
 
-    content: str
+    # F11: reject empty/oversized questions before they reach the model/DB
+    content: str = Field(..., min_length=1, max_length=settings.MAX_QUESTION_CHARS)
     session_id: Optional[str] = None
     mode: Optional[str] = None   # a domain label (e.g. 'vat') routes to the RAG pipeline
 

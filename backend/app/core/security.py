@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from typing import Optional
 from datetime import datetime, timedelta, timezone
-from jose import JWTError, jwt
+import jwt  # PyJWT (replaces unmaintained python-jose / ecdsa chain — F6)
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -30,14 +30,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 def decode_access_token(token: str) -> Optional[dict]:
-    
+
     try:
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
-            algorithms= [settings.ALGORITHM]
+            algorithms=[settings.ALGORITHM]
         )
         return payload
-    except JWTError:
-        print(JWTError)
+    except jwt.PyJWTError:
+        # invalid / expired / tampered token — caller maps None to 401
         return None

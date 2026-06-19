@@ -17,6 +17,33 @@ class AuditNotFound(AppException):
     detail = "Audit record not found."
 
 
+@router.get("")
+def list_answers(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    limit: int = 50,
+):
+    rows = (
+        db.query(AuditLog)
+        .filter(AuditLog.user_id == current_user.id)
+        .order_by(AuditLog.id.desc())
+        .limit(min(limit, 200))
+        .all()
+    )
+    return [
+        {
+            "id": r.id,
+            "created_at": str(r.created_at),
+            "question": r.question,
+            "domain": r.domain,
+            "abstained": r.abstained,
+            "model": r.model,
+            "n_citations": len(r.citations or []),
+        }
+        for r in rows
+    ]
+
+
 @router.get("/{audit_id}/audit")
 def get_answer_audit(
     audit_id: int,

@@ -1,5 +1,5 @@
 # Eval report (full)
-_generated 2026-06-15T23:14:51+00:00, 560s, gen=gpt-5.1_
+_generated 2026-06-18T22:06:27+00:00, 727s, gen=gpt-5.1_
 
 ## Retrieval
 - in-scope evaluable: **25**, hits: **24**, misses: 1
@@ -7,8 +7,8 @@ _generated 2026-06-15T23:14:51+00:00, 560s, gen=gpt-5.1_
 - not_in_corpus (excluded): []
 
 ## Answering
-- in-scope answered (not abstained): **23/25**
-- **CITATION VALIDITY: 100%** (134/134 verified & resolve, gate = 100%)
+- in-scope answered (not abstained): **22/25**
+- **CITATION VALIDITY: 100%** (135/135 verified & resolve, gate = 100%)
 
 ## Abstention
 - **5/5 out-of-scope questions correctly abstained**

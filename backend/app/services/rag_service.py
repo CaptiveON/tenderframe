@@ -18,6 +18,7 @@ from app.rag.answer import (
 )
 from app.rag.audit import write_audit
 from app.rag.retrieve import retrieve
+from app.rag.route import in_domain
 from app.rag.schemas import AnswerResult, Citation, RetrievedContext
 from app.rag.verify import verify_claims
 
@@ -31,9 +32,13 @@ class RagService:
     ) -> AnswerResult:
         ctx = retrieve(db, question, domain)
 
-        # Layer 1: weak retrieval → abstain before any generation
+        # Layer 1a: nothing relevant retrieved at all → abstain (cheap floor)
         if ctx.best_similarity < settings.ABSTAIN_SCORE_THRESHOLD:
             return self._abstain(db, user_id, conversation_id, ctx, "weak_retrieval")
+
+        # Layer 1b: scope router — cosine can't separate scope, the small model can
+        if not in_domain(question, domain):
+            return self._abstain(db, user_id, conversation_id, ctx, "out_of_scope")
 
         raw_answer, facts = compose_answer(db, ctx)
 
@@ -45,18 +50,16 @@ class RagService:
 
         chunk_texts = {c.chunk_id: c.text for c in ctx.matched}
         chunk_texts.update({c.chunk_id: c.text for c in ctx.hydrated})
-        verification = verify_claims(claims, chunk_texts, {f.key for f in facts})
+        verification = verify_claims(question, claims, chunk_texts, {f.key for f in facts})
 
-        # Layer 3: remove unverified claims; >50% failures → abstain entirely.
-        # A claim is grounded if ANY of its cited passages supports it
-        # (pair-level results are still all recorded in the audit log).
+        # Layer 3: keep only verified claims (a claim is grounded if ANY of its
+        # cited passages supports it). Unverified claims are dropped, not served;
+        # we abstain only if nothing verifiable survives — so everything the user
+        # sees is verifier-passed, without nuking a partly-derived good answer.
         verdict_by_claim: dict[str, bool] = {}
         for v in verification:
             verdict_by_claim[v["claim"]] = verdict_by_claim.get(v["claim"], False) or v["verified"]
         failed = {c for c, ok in verdict_by_claim.items() if not ok}
-        if verdict_by_claim and len(failed) / len(verdict_by_claim) > 0.5:
-            return self._abstain(db, user_id, conversation_id, ctx,
-                                 "verification_failed", verification)
         final_sentences = [s for s in kept_sentences if s not in failed]
         final_answer = " ".join(strip_markers(s) for s in final_sentences).strip()
         if not final_answer:

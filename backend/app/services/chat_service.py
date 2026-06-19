@@ -2,16 +2,19 @@ from sqlalchemy.orm import Session
 from app.crud import crud_chat
 from app.models.chat import Message, ChatSession
 from app.schema import MessageCreate, MessageResponse, ChatResponse, ChatHistory, ChatSessions, ChatSessionResponse
-from app.exceptions.chat_exceptions import BotResponseException, MessageStorageException
+from app.exceptions.chat_exceptions import BotResponseException, MessageStorageException, SessionNotFound
 class ChatService:
-    
+
     def process_message(self, db: Session, user_id: str, message_data: MessageCreate) -> ChatResponse:
-        
+
         chat_session = None
         if message_data.session_id:
+            # F4: a supplied session id must belong to the caller, else 404 —
+            # never append to (or reveal) another user's conversation.
             chat_session = crud_chat.get_session(db, message_data.session_id)
+            if chat_session is None or chat_session.user_id != user_id:
+                raise SessionNotFound()
         if not chat_session:
-                # raise ValueError("Session not Found!")
             title = (message_data.content[:50] + "...") if len(message_data.content) > 50 else message_data.content
             chat_session = ChatSession(
                 title = title,
@@ -62,8 +65,13 @@ class ChatService:
             audit_id= audit_id
         )
         
-    def get_chat_history(self, db: Session, session_id: str):
-        
+    def get_chat_history(self, db: Session, user_id: str, session_id: str):
+
+        # F3: only the owner may read a conversation's messages
+        chat_session = crud_chat.get_session(db, session_id)
+        if chat_session is None or chat_session.user_id != user_id:
+            raise SessionNotFound()
+
         orm_messages =  crud_chat.get_session_messages(db, session_id)
 
         return ChatHistory(

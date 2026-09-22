@@ -11,7 +11,7 @@ from app.exceptions.base import AppException
 app = FastAPI(
     title = "TenderFrame API",
     description= "Auditable UK VAT guidance with verifiable citations.",
-    version="0.0.1"
+    version="1.0.0"
 )
 
 # F9: CORS origins from env (comma-separated), not "*"; methods/headers scoped.
@@ -48,4 +48,4 @@ async def app_exception_handler(request: Request, exc: AppException):
 
 @app.get("/")
 def root():
-    return {"message": "ElegantBot Chat API"}
+    return {"message": "TenderFrame API"}

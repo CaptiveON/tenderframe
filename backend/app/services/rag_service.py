@@ -16,7 +16,7 @@ from app.rag.answer import (
     enforce_contract,
     strip_markers,
 )
-from app.rag.audit import write_audit
+from app.rag.audit import enrich_citation, write_audit
 from app.rag.retrieve import retrieve
 from app.rag.route import in_domain
 from app.rag.schemas import AnswerResult, Citation, RetrievedContext
@@ -68,19 +68,22 @@ class RagService:
         final_answer = f"{final_answer}\n\n{DISCLAIMER}"
 
         citation_meta = {c.chunk_id: c for c in ctx.matched}
+        doc_by_chunk = {h.chunk_id: h.document_id for h in ctx.hydrated}
         citations = []
         for v in verification:
             if not v["verified"] or any(v["claim"] == s for s in failed):
                 continue
             m = citation_meta.get(v["chunk_id"])
+            if m is not None:
+                meta = dict(title=m.title, section_id=m.section_id,
+                            web_url=m.web_url, public_updated_at=m.public_updated_at)
+            else:
+                # hydrated (or fact) citation: resolve title/link the same way the audit view does
+                src = enrich_citation(db, v["chunk_id"], doc_by_chunk)
+                meta = dict(title=src.get("title"), section_id=src.get("section_id"),
+                            web_url=src.get("web_url"), public_updated_at=src.get("public_updated_at"))
             citations.append(Citation(
-                claim=strip_markers(v["claim"]),
-                chunk_id=v["chunk_id"],
-                verified=True,
-                title=m.title if m else None,
-                section_id=m.section_id if m else None,
-                web_url=m.web_url if m else None,
-                public_updated_at=m.public_updated_at if m else None,
+                claim=strip_markers(v["claim"]), chunk_id=v["chunk_id"], verified=True, **meta,
             ))
 
         row = write_audit(db, user_id, conversation_id, ctx, final_answer,
